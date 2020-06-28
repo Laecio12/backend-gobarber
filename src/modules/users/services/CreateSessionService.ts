@@ -1,5 +1,5 @@
 import IUserRepository from '../repositories/IUserRepository';
-import IHashProvider from '../providers/hashProvider/models/IHashProvider';
+import IHashProvider from '../providers/HashProvider/models/IHashProvider';
 
 import { sign } from 'jsonwebtoken';
 import User from '@modules/users/infra/typeorm/entities/User';
