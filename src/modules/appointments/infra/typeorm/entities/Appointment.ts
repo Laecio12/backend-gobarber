@@ -11,7 +11,7 @@ import {
 import User from '@modules/users/infra/typeorm/entities/User';
 
 @Entity('appointments')
-export default class Appointment {
+class Appointment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -21,7 +21,7 @@ export default class Appointment {
   @ManyToOne(() => User)
   @JoinColumn({ name: 'provider_id' })
   provider: User;
-  
+
   @Column()
   user_id: string;
 
@@ -38,3 +38,5 @@ export default class Appointment {
   @UpdateDateColumn()
   updated_at: Date;
 }
+
+export default Appointment;

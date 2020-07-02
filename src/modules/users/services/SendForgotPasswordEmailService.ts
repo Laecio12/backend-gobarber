@@ -1,47 +1,47 @@
-import IUserRepository from '../repositories/IUserRepository';
-import IUserTokenRepository from '../repositories/IUserTokenRepository'
-import AppError from '@shared/errors/AppErrors';
-import IMailProvider from '@shared/container/providers/MailProvider/models/IMailProvider'
+// import User from '@modules/users/infra/typeorm/entities/User';
+import AppError from '@shared/errors/AppError';
 import { injectable, inject } from 'tsyringe';
-import path from 'path'
+import IMailProvider from '@shared/container/providers/MailProvider/models/IMailProvider';
+import path from 'path';
+import IUsersRepository from '../repositories/IUsersRepository';
+import IUserTokensRepository from '../repositories/IUserTokensRepository';
+
 interface IRequest {
-   email: string;
+  email: string;
 }
 
 @injectable()
-export default class SendForgotPasswordEmailService {
+class SendForgotPasswordEmailService {
   constructor(
     @inject('UsersRepository')
-    private userRepository: IUserRepository,
+    private usersRepository: IUsersRepository,
 
     @inject('MailProvider')
     private mailProvider: IMailProvider,
-    
+
     @inject('UserTokensRepository')
-    private userTokenRepository: IUserTokenRepository,
+    private userTokensRepository: IUserTokensRepository,
+  ) {}
 
-  ){}
+  public async execute({ email }: IRequest): Promise<void> {
+    const user = await this.usersRepository.findByEmail(email);
 
-  public async execute({email}: IRequest): Promise<void> {
-    const user = await this.userRepository.findByEmail(email);
-
-    if(!user){
-      throw new AppError('User does not exists.')
+    if (!user) {
+      throw new AppError('User does not exists.');
     }
 
-    const { token } = await this.userTokenRepository.generate(user.id);
+    const { token } = await this.userTokensRepository.generate(user.id);
+
     const forgotPasswordTemplate = path.resolve(
       __dirname,
       '..',
       'views',
-      'forgot_password.hbs'
-    )
+      'forgot_password.hbs',
+    );
+
     await this.mailProvider.sendMail({
-      to: {
-        name: user.name,
-        email: user.email,
-      },
-      subject: '[GoBarber] Recuperação de  senha',
+      to: { name: user.name, email: user.email },
+      subject: '[GoBarber] Recuperação de senha',
       templateData: {
         file: forgotPasswordTemplate,
         variables: {
@@ -50,6 +50,7 @@ export default class SendForgotPasswordEmailService {
         },
       },
     });
-   
   }
 }
+
+export default SendForgotPasswordEmailService;

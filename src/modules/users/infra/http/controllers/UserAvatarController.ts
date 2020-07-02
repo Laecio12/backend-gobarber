@@ -1,19 +1,17 @@
 import { Request, Response } from 'express';
-import { container } from 'tsyringe'
-import ensureAuthenticated from '@modules/users/infra/http/middlewares/ensureAuthenticated';
-import UpdateAvatarService from '@modules/users/services/UploadAvatarService';
+import { container } from 'tsyringe';
+import UpdateUserAvatarService from '@modules/users/services/UpdateUserAvatarService';
+import { classToClass } from 'class-transformer';
 
+export default class UserAvatarControllerController {
+  public async update(request: Request, response: Response): Promise<Response> {
+    const updateUserAvatar = container.resolve(UpdateUserAvatarService);
 
-
-export default class UserAvatarController {
-  public async update( request: Request, response: Response): Promise<Response>{
-    const updloadteUserAvatar = container.resolve(UpdateAvatarService);
-
-    const user = await updloadteUserAvatar.execute({
+    const user = await updateUserAvatar.execute({
       user_id: request.user.id,
-      avatarFileName: request.file.filename,
+      avatarFilename: request.file.filename,
     });
-    delete user.password;
-    return response.json(user);
+
+    return response.json(classToClass(user));
   }
 }
